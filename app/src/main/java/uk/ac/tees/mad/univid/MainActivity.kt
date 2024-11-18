@@ -21,7 +21,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             Lost2FoundTheme {
-
+                AppNavigation()
             }
         }
     }

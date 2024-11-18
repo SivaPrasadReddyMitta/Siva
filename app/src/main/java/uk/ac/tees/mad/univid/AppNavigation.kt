@@ -1,5 +1,6 @@
 package uk.ac.tees.mad.univid
 
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -8,7 +9,9 @@ import androidx.navigation.compose.rememberNavController
 import uk.ac.tees.mad.univid.screens.DetailsScreen
 import uk.ac.tees.mad.univid.screens.HomeScreen
 import uk.ac.tees.mad.univid.screens.LoginScreen
+import uk.ac.tees.mad.univid.screens.ProfileScreen
 import uk.ac.tees.mad.univid.screens.RegisterScreen
+import uk.ac.tees.mad.univid.screens.ReportScreen
 import uk.ac.tees.mad.univid.screens.SplashScreen
 
 sealed class AppNavigationComponent(val route: String){
@@ -26,29 +29,29 @@ sealed class AppNavigationComponent(val route: String){
 fun AppNavigation() {
     val viewModel : MainViewModel = viewModel()
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = AppNavigationComponent.Splash.route ){
-        composable(route = AppNavigationComponent.Splash.route){
+    Surface {
+    NavHost(navController = navController, startDestination = AppNavigationComponent.Splash.route ) {
+        composable(route = AppNavigationComponent.Splash.route) {
             SplashScreen(navController = navController, vm = viewModel)
         }
-        composable(route = AppNavigationComponent.Login.route){
+        composable(route = AppNavigationComponent.Login.route) {
             LoginScreen(navController = navController, vm = viewModel)
         }
-        composable(route = AppNavigationComponent.Register.route){
+        composable(route = AppNavigationComponent.Register.route) {
             RegisterScreen(navController = navController, vm = viewModel)
         }
-        composable(route = AppNavigationComponent.Home.route){
+        composable(route = AppNavigationComponent.Home.route) {
             HomeScreen(navController = navController, vm = viewModel)
         }
-        composable(route = AppNavigationComponent.Details.route){
+        composable(route = AppNavigationComponent.Details.route) {
             DetailsScreen(navController = navController, vm = viewModel)
         }
-        composable(route = AppNavigationComponent.Profile.route){
+        composable(route = AppNavigationComponent.Profile.route) {
             ProfileScreen(navController = navController, vm = viewModel)
         }
-        composable(route = AppNavigationComponent.Report.route){
+        composable(route = AppNavigationComponent.Report.route) {
             ReportScreen(navController = navController, vm = viewModel)
         }
-
-
+    }
     }
 }

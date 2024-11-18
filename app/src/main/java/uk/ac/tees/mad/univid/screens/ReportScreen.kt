@@ -1,4 +1,9 @@
 package uk.ac.tees.mad.univid.screens
 
-class ReportScreen {
+import androidx.compose.runtime.Composable
+import androidx.navigation.NavController
+import uk.ac.tees.mad.univid.MainViewModel
+
+@Composable
+fun ReportScreen(navController: NavController, vm : MainViewModel) {
 }
