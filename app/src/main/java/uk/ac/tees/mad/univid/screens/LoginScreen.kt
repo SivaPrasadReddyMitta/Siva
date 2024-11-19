@@ -1,7 +1,9 @@
 package uk.ac.tees.mad.univid.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,7 +30,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import uk.ac.tees.mad.univid.AppNavigationComponent
 import uk.ac.tees.mad.univid.MainViewModel
+import uk.ac.tees.mad.univid.Utils.darkPurpleColor
+import uk.ac.tees.mad.univid.Utils.navigateWithBackStack
 import uk.ac.tees.mad.univid.Utils.yellowColor
 import uk.ac.tees.mad.univid.ui.theme.poppins
 
@@ -47,7 +52,7 @@ fun LoginScreen(navController: NavController, vm: MainViewModel) {
             text = "Log In.", fontFamily = poppins, fontWeight = FontWeight.SemiBold,
             fontSize = 40.sp, modifier = Modifier.padding(top = 100.dp)
         )
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(90.dp))
         Column {
             Text(text = "EMAIL", fontFamily = poppins, fontWeight = FontWeight.Bold)
             TextField(value = email, onValueChange = { email = it }, colors = TextFieldDefaults.textFieldColors(
@@ -72,8 +77,18 @@ fun LoginScreen(navController: NavController, vm: MainViewModel) {
         }
         Spacer(modifier = Modifier.height(40.dp))
         Button(onClick = { /*TODO*/ }, shape = RoundedCornerShape(10.dp), colors = ButtonDefaults.buttonColors(
-            yellowColor) , modifier = Modifier.height(50.dp).width(280.dp)) {
+            yellowColor) , modifier = Modifier
+            .height(50.dp)
+            .width(280.dp)) {
             Text(text = "Log In")
+        }
+        Spacer(modifier = Modifier.height(100.dp))
+        Row {
+            Text(text = "Don't have an account?", fontFamily = poppins)
+            Text(text = " Sign up", fontFamily = poppins, fontWeight = FontWeight.SemiBold, color = darkPurpleColor,
+                modifier = Modifier.clickable {
+                    navigateWithBackStack(navController = navController, route = AppNavigationComponent.Register)
+                })
         }
     }
 }
