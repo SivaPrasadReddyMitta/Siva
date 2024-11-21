@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -25,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -34,17 +36,25 @@ import uk.ac.tees.mad.univid.AppNavigationComponent
 import uk.ac.tees.mad.univid.MainViewModel
 import uk.ac.tees.mad.univid.Utils.darkPurpleColor
 import uk.ac.tees.mad.univid.Utils.navigateWithBackStack
+import uk.ac.tees.mad.univid.Utils.navigateWithoutBackStack
 import uk.ac.tees.mad.univid.Utils.yellowColor
 import uk.ac.tees.mad.univid.ui.theme.poppins
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(navController: NavController, vm: MainViewModel) {
+    val isSignedIn = vm.isSignedIn
+    val isLoading = vm.isLoading
+    val context = LocalContext.current
     var email by remember {
         mutableStateOf("")
     }
     var password by remember {
         mutableStateOf("")
+    }
+
+    if (isSignedIn.value){
+        navigateWithoutBackStack(navController, AppNavigationComponent.Home)
     }
     Column(modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally) {
@@ -76,11 +86,15 @@ fun LoginScreen(navController: NavController, vm: MainViewModel) {
                 ))
         }
         Spacer(modifier = Modifier.height(40.dp))
-        Button(onClick = { /*TODO*/ }, shape = RoundedCornerShape(10.dp), colors = ButtonDefaults.buttonColors(
+        Button(onClick = { vm.signIn(context = context, email = email, password = password) }, shape = RoundedCornerShape(10.dp), colors = ButtonDefaults.buttonColors(
             yellowColor) , modifier = Modifier
             .height(50.dp)
             .width(280.dp)) {
-            Text(text = "Log In")
+            if (isLoading.value) {
+                CircularProgressIndicator()
+            } else {
+                Text(text = "Log In")
+            }
         }
         Spacer(modifier = Modifier.height(100.dp))
         Row {

@@ -27,6 +27,8 @@ import uk.ac.tees.mad.univid.Utils.navigateWithoutBackStack
 
 @Composable
 fun SplashScreen(navController: NavController, vm : MainViewModel) {
+
+    val isSignedIn = vm.isSignedIn
     val visible = remember { androidx.compose.runtime.mutableStateOf(true) }
     val scale = remember { Animatable(0.3f) }
 
@@ -40,7 +42,11 @@ fun SplashScreen(navController: NavController, vm : MainViewModel) {
         )
         delay(3000) // Splash screen delay
         visible.value = false
-        navigateWithoutBackStack(navController, AppNavigationComponent.Login)
+        if (isSignedIn.value) {
+            navigateWithoutBackStack(navController, AppNavigationComponent.Home)
+        } else {
+            navigateWithoutBackStack(navController, AppNavigationComponent.Login)
+        }
     }
 
     Box(
