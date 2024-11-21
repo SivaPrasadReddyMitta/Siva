@@ -57,11 +57,15 @@ dependencies {
 
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.core.animation)
+    implementation(libs.play.services.location)
     //navigation
     val nav_version = "2.7.7"
     implementation("androidx.navigation:navigation-fragment-ktx:$nav_version")
     implementation("androidx.navigation:navigation-ui-ktx:$nav_version")
 
+    //permission
+    implementation ("com.google.accompanist:accompanist-permissions:0.30.1")
+    implementation ("com.google.android.gms:play-services-location:21.0.1")
 
     //Dagger-Hilt
     implementation("com.google.dagger:hilt-android:2.51.1")

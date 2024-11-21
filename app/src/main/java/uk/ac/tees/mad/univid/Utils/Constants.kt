@@ -9,6 +9,8 @@ val whiteColor = Color(0xFFFAF7CC)
 val darkPurpleColor = Color(0xFF54309E)
 val lightPurpleColor = Color(0xFFCDC1FF)
 
+const val USERS = "users"
+
 
 fun navigateWithoutBackStack(navController: NavController, route: AppNavigationComponent){
     navController.navigate(route.route){
