@@ -15,6 +15,7 @@ firebaseStorage = "21.0.0"
 navigationCompose = "2.7.7"
 coreAnimation = "1.0.0"
 playServicesLocation = "21.3.0"
+androidbrowserhelper = "2.5.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -37,6 +38,7 @@ firebase-storage = { group = "com.google.firebase", name = "firebase-storage", v
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 androidx-core-animation = { group = "androidx.core", name = "core-animation", version.ref = "coreAnimation" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
+androidbrowserhelper = { group = "com.google.androidbrowserhelper", name = "androidbrowserhelper", version.ref = "androidbrowserhelper" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

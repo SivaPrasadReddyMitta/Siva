@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.location.Location
+import android.location.LocationManager
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
@@ -20,6 +21,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -30,9 +32,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,10 +51,12 @@ import androidx.core.content.FileProvider
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.PermissionStatus
+import com.google.accompanist.permissions.rememberPermissionState
+import com.google.android.gms.location.LocationServices
 import uk.ac.tees.mad.univid.MainViewModel
 import uk.ac.tees.mad.univid.R
 import uk.ac.tees.mad.univid.Utils.darkPurpleColor
-import uk.ac.tees.mad.univid.Utils.lightPurpleColor
 import uk.ac.tees.mad.univid.ui.theme.poppins
 import java.io.File
 import java.text.SimpleDateFormat
@@ -68,10 +74,12 @@ fun ReportScreen(navController: NavController, vm : MainViewModel) {
     var description by remember {
         mutableStateOf("")
     }
-    var location by remember {
-        mutableStateOf("")
-    }
+    var location by remember { mutableStateOf("") }
     val context = LocalContext.current
+    val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
+    val locationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
+
+    val scope = rememberCoroutineScope()
     val file = context.createImageFile()
     var capturedImageUri by remember {
         mutableStateOf<Uri>(Uri.EMPTY)
@@ -80,6 +88,7 @@ fun ReportScreen(navController: NavController, vm : MainViewModel) {
         Objects.requireNonNull(context),
         context.packageName + ".provider", file
     )
+
 
     val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()){
         capturedImageUri = uri
@@ -97,6 +106,44 @@ fun ReportScreen(navController: NavController, vm : MainViewModel) {
             Toast.makeText(context, "Permission Denied", Toast.LENGTH_SHORT).show()
         }
     }
+
+    fun getCurrentLocation() {
+
+        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        val isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+        val isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+
+        if (isGpsEnabled || isNetworkEnabled) {
+            Log.d("GPS", "GPS ENABLED")
+            if (locationPermissionState.status == PermissionStatus.Granted) {
+                Log.d("GPS", "GPS ENABLED2")
+                fusedLocationClient.lastLocation.addOnSuccessListener { loc: Location? ->
+                    Log.d("Location", "Location Found")
+                    Log.d("Location", "${loc?.latitude}, ${loc?.longitude}")
+                    loc?.let {
+                        val locString = "Lat: ${it.latitude}, Lon: ${it.longitude}"
+                        getAddressFromLocation(context = context, location = loc, onChange = {
+                            location = it
+                        })
+                        Log.d("Location", locString)
+                    }
+                }
+            } else {
+                Log.d("GPS", "GPS NOT ENABLED 1")
+
+                locationPermissionState.launchPermissionRequest()
+            }
+        } else {
+            Log.d("GPS", "GPS NOT ENABLED")
+
+            Toast.makeText(context, "Please turn on GPS", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    LaunchedEffect(key1 = true) {
+        getCurrentLocation()
+    }
+
 
     Scaffold(modifier = Modifier
         .fillMaxSize()
@@ -150,7 +197,7 @@ fun ReportScreen(navController: NavController, vm : MainViewModel) {
             Spacer(modifier = Modifier.height(10.dp))
             Column {
                 Text(text = "TITLE", fontFamily = poppins, fontWeight = FontWeight.Bold)
-                TextField(value = title, onValueChange = { title = it },singleLine = true,
+                TextField(value = title, onValueChange = { title = it },singleLine = true,modifier = Modifier.width(280.dp),
                     colors = TextFieldDefaults.textFieldColors(
                         disabledTextColor = Color.Transparent,
                         focusedIndicatorColor = Color.Transparent,
@@ -162,7 +209,7 @@ fun ReportScreen(navController: NavController, vm : MainViewModel) {
             Spacer(modifier = Modifier.height(25.dp))
             Column {
                 Text(text = "DESCRIPTION", fontFamily = poppins, fontWeight = FontWeight.Bold)
-                TextField(value = description, onValueChange = { description = it },
+                TextField(value = description, onValueChange = { description = it },modifier = Modifier.width(280.dp),
                     colors = TextFieldDefaults.textFieldColors(
                         disabledTextColor = Color.Transparent,
                         focusedIndicatorColor = Color.Transparent,
@@ -174,7 +221,7 @@ fun ReportScreen(navController: NavController, vm : MainViewModel) {
             Spacer(modifier = Modifier.height(25.dp))
             Column {
                 Text(text = "LOCATION", fontFamily = poppins, fontWeight = FontWeight.Bold)
-                TextField(value = location, onValueChange = { location = it },singleLine = true,
+                TextField(value = location, onValueChange = { location = it },singleLine = true, modifier = Modifier.width(280.dp),
                     colors = TextFieldDefaults.textFieldColors(
                         disabledTextColor = Color.Transparent,
                         focusedIndicatorColor = Color.Transparent,
