@@ -13,6 +13,8 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -27,6 +29,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -88,21 +91,18 @@ fun ReportScreen(navController: NavController, vm : MainViewModel) {
         Objects.requireNonNull(context),
         context.packageName + ".provider", file
     )
+    val isLoading = vm.isLoading
 
-
-    val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()){
+    val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) {
         capturedImageUri = uri
     }
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ){
-        if (it)
-        {
+    ) {
+        if (it) {
             Toast.makeText(context, "Permission Granted", Toast.LENGTH_SHORT).show()
             cameraLauncher.launch(uri)
-        }
-        else
-        {
+        } else {
             Toast.makeText(context, "Permission Denied", Toast.LENGTH_SHORT).show()
         }
     }
@@ -152,88 +152,115 @@ fun ReportScreen(navController: NavController, vm : MainViewModel) {
             BottomNavBar(selectedItem = BottomNavItems.ReportScreen, navController = navController)
         }
     ) {
-        Column(modifier = Modifier
+        Box(modifier = Modifier
             .fillMaxSize()
-            .padding(it),
-            horizontalAlignment = Alignment.CenterHorizontally) {
+            .padding(it)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
 
-            Spacer(modifier = Modifier.height(20.dp))
-            if (capturedImageUri.path?.isNotEmpty() == true)
-            {
-                Image(
-                    modifier = Modifier
-                        .size(300.dp)
-                        .padding(16.dp, 8.dp)
-                        .clip(RoundedCornerShape(30.dp)),
-                    painter = rememberImagePainter(capturedImageUri),
-                    contentDescription = null
-                )
-            }
-            else
-            {
-                Image(
-                    modifier = Modifier
-                        .size(300.dp)
-                        .padding(16.dp, 8.dp)
-                        .clip(RoundedCornerShape(30.dp)),
-                    painter = painterResource(id = R.drawable.app_logo),
-                    contentDescription = null
-                )
-            }
-            Button(onClick = { val permissionCheckResult =
-                ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
-
-                if (permissionCheckResult == PackageManager.PERMISSION_GRANTED)
-                {
-                    cameraLauncher.launch(uri)
+                Spacer(modifier = Modifier.height(20.dp))
+                if (capturedImageUri.path?.isNotEmpty() == true) {
+                    Image(
+                        modifier = Modifier
+                            .size(300.dp)
+                            .padding(16.dp, 8.dp)
+                            .clip(RoundedCornerShape(30.dp)),
+                        painter = rememberImagePainter(capturedImageUri),
+                        contentDescription = null
+                    )
+                } else {
+                    Image(
+                        modifier = Modifier
+                            .size(300.dp)
+                            .padding(16.dp, 8.dp)
+                            .clip(RoundedCornerShape(30.dp)),
+                        painter = painterResource(id = R.drawable.app_logo),
+                        contentDescription = null
+                    )
                 }
-                else
-                {
-                    permissionLauncher.launch(Manifest.permission.CAMERA)
-                }
-            }, colors = ButtonDefaults.buttonColors(darkPurpleColor)) {
-                Text(text = "Capture Image")
-            }
-            Spacer(modifier = Modifier.height(10.dp))
-            Column {
-                Text(text = "TITLE", fontFamily = poppins, fontWeight = FontWeight.Bold)
-                TextField(value = title, onValueChange = { title = it },singleLine = true,modifier = Modifier.width(280.dp),
-                    colors = TextFieldDefaults.textFieldColors(
-                        disabledTextColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                        disabledIndicatorColor = Color.Transparent,
-                        cursorColor = Color.Black
-                    ))
-            }
-            Spacer(modifier = Modifier.height(25.dp))
-            Column {
-                Text(text = "DESCRIPTION", fontFamily = poppins, fontWeight = FontWeight.Bold)
-                TextField(value = description, onValueChange = { description = it },modifier = Modifier.width(280.dp),
-                    colors = TextFieldDefaults.textFieldColors(
-                        disabledTextColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                        disabledIndicatorColor = Color.Transparent,
-                        cursorColor = Color.Black
-                    ))
-            }
-            Spacer(modifier = Modifier.height(25.dp))
-            Column {
-                Text(text = "LOCATION", fontFamily = poppins, fontWeight = FontWeight.Bold)
-                TextField(value = location, onValueChange = { location = it },singleLine = true, modifier = Modifier.width(280.dp),
-                    colors = TextFieldDefaults.textFieldColors(
-                        disabledTextColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                        disabledIndicatorColor = Color.Transparent,
-                        cursorColor = Color.Black
-                    ))
-            }
-            Spacer(modifier = Modifier.height(20.dp))
+                Button(onClick = {
+                    val permissionCheckResult =
+                        ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
 
-            Button(onClick = { /*TODO*/ }, colors = ButtonDefaults.buttonColors(darkPurpleColor)) {
-                Text(text = "Submit")
+                    if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
+                        cameraLauncher.launch(uri)
+                    } else {
+                        permissionLauncher.launch(Manifest.permission.CAMERA)
+                    }
+                }, colors = ButtonDefaults.buttonColors(darkPurpleColor)) {
+                    Text(text = "Capture Image")
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+                Column {
+                    Text(text = "TITLE", fontFamily = poppins, fontWeight = FontWeight.Bold)
+                    TextField(
+                        value = title,
+                        onValueChange = { title = it },
+                        singleLine = true,
+                        modifier = Modifier.width(280.dp),
+                        colors = TextFieldDefaults.textFieldColors(
+                            disabledTextColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            disabledIndicatorColor = Color.Transparent,
+                            cursorColor = Color.Black
+                        )
+                    )
+                }
+                Spacer(modifier = Modifier.height(25.dp))
+                Column {
+                    Text(text = "DESCRIPTION", fontFamily = poppins, fontWeight = FontWeight.Bold)
+                    TextField(
+                        value = description,
+                        onValueChange = { description = it },
+                        modifier = Modifier.width(280.dp),
+                        colors = TextFieldDefaults.textFieldColors(
+                            disabledTextColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            disabledIndicatorColor = Color.Transparent,
+                            cursorColor = Color.Black
+                        )
+                    )
+                }
+                Spacer(modifier = Modifier.height(25.dp))
+                Column {
+                    Text(text = "LOCATION", fontFamily = poppins, fontWeight = FontWeight.Bold)
+                    TextField(
+                        value = location,
+                        onValueChange = { location = it },
+                        singleLine = true,
+                        modifier = Modifier.width(280.dp),
+                        colors = TextFieldDefaults.textFieldColors(
+                            disabledTextColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            disabledIndicatorColor = Color.Transparent,
+                            cursorColor = Color.Black
+                        )
+                    )
+                }
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Button(onClick = {
+                    vm.addItem(
+                        context = context,
+                        title = title,
+                        description = description,
+                        image = capturedImageUri,
+                        location = location
+                    )
+                }, colors = ButtonDefaults.buttonColors(darkPurpleColor)) {
+                    Text(text = "Submit")
+                }
+            }
+            if (isLoading.value) {
+                Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.5f)), contentAlignment = Alignment.Center) {
+                    LinearProgressIndicator()
+                }
             }
         }
     }

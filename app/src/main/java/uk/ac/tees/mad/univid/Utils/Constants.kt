@@ -10,6 +10,7 @@ val darkPurpleColor = Color(0xFF54309E)
 val lightPurpleColor = Color(0xFFCDC1FF)
 
 const val USERS = "users"
+const val ITEMS = "items"
 
 
 fun navigateWithoutBackStack(navController: NavController, route: AppNavigationComponent){
