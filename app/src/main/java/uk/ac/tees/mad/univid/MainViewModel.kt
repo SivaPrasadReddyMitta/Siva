@@ -1,5 +1,6 @@
 package uk.ac.tees.mad.univid
 
+import android.app.Application
 import android.content.Context
 import android.net.Uri
 import android.util.Log
@@ -10,6 +11,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import dagger.hilt.android.internal.Contexts.getApplication
 import dagger.hilt.android.lifecycle.HiltViewModel
 import uk.ac.tees.mad.univid.Utils.ITEMS
 import uk.ac.tees.mad.univid.Utils.USERS
@@ -34,19 +36,25 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun signUp(context : Context, name: String, email: String, password: String, phone: String){
+    fun signUp(context: Context, name: String, email: String, password: String, phone: String) {
         isLoading.value = true
-        val user = UserData(
-            name = name,
-            email = email,
-            password = password,
-            phonenumber = phone
-        )
         auth.createUserWithEmailAndPassword(email, password).addOnSuccessListener {
-            firestore.collection(USERS).document(it.user!!.uid).set(user)
-            getUserData(context, it.user!!.uid)
-            isSignedIn.value = true
-            isLoading.value = false
+            val uid = it.user!!.uid // Retrieve the user's UID
+            val user = UserData(
+                uid = uid,
+                name = name,
+                email = email,
+                password = password,
+                phonenumber = phone
+            )
+            firestore.collection(USERS).document(uid).set(user).addOnSuccessListener {
+                getUserData(context, uid)
+                isSignedIn.value = true
+                isLoading.value = false
+            }.addOnFailureListener { e ->
+                isLoading.value = false
+                Toast.makeText(context, "Failed to save user data: ${e.message}", Toast.LENGTH_LONG).show()
+            }
         }.addOnFailureListener {
             isLoading.value = false
             Toast.makeText(context, "${it.message}", Toast.LENGTH_LONG).show()
@@ -82,16 +90,21 @@ class MainViewModel @Inject constructor(
         uploadTask.addOnSuccessListener { item ->
                 val downloadUrl = item.storage.downloadUrl
             val itemData = ItemData(
+                name = userData.value!!.name,
+                number = userData.value!!.phonenumber,
                 title = title,
                 description = description,
                 image = downloadUrl.toString(),
                 location = location
             )
+            Log.d("Item Data", itemData.toString())
                 firestore.collection(ITEMS).add(itemData).addOnSuccessListener { item->
                     val id = item.id
                     val itemRef = itemData.copy(id = id)
                     firestore.collection(ITEMS).document(id).set(itemRef)
                     isLoading.value = false
+                    Log.d("Item Post", itemRef.toString())
+                    Toast.makeText(context, "Item added successfully", Toast.LENGTH_LONG).show()
                 }.addOnFailureListener {
                     isLoading.value = false
                     Toast.makeText(context, "${it.message}", Toast.LENGTH_LONG).show()
