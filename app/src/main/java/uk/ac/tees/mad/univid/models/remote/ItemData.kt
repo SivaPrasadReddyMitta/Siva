@@ -8,4 +8,6 @@ data class ItemData (
     val image : String,
     val description : String,
     val location : String
-)
+){
+    constructor(): this("","","","","","","")
+}

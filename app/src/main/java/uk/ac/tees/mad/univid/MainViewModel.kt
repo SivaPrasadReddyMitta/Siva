@@ -1,17 +1,14 @@
 package uk.ac.tees.mad.univid
 
-import android.app.Application
 import android.content.Context
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
-import dagger.hilt.android.internal.Contexts.getApplication
 import dagger.hilt.android.lifecycle.HiltViewModel
 import uk.ac.tees.mad.univid.Utils.ITEMS
 import uk.ac.tees.mad.univid.Utils.USERS
@@ -29,13 +26,23 @@ class MainViewModel @Inject constructor(
     val isLoading = mutableStateOf(false)
     val isSignedIn = mutableStateOf(false)
     val userData = mutableStateOf<UserData?>(null)
+    val item = mutableStateOf<List<ItemData>>(emptyList<ItemData>())
 
     init {
         if(auth.currentUser != null){
             isSignedIn.value = true
         }
+        getAllFromFirebase()
     }
 
+    fun getAllFromFirebase(){
+        firestore.collection(ITEMS).get().addOnSuccessListener {
+            item.value = it.toObjects(ItemData::class.java)
+            Log.d("Item", "${item.value}")
+        }.addOnFailureListener {
+            Log.d("Item", "${it.message}")
+        }
+    }
     fun signUp(context: Context, name: String, email: String, password: String, phone: String) {
         isLoading.value = true
         auth.createUserWithEmailAndPassword(email, password).addOnSuccessListener {
@@ -82,23 +89,32 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun addItem(context : Context,title: String, description: String, image: Uri, location : String){
+    fun addItem(context: Context, title: String, description: String, image: Uri, location: String) {
+        getUserData(context, auth.currentUser!!.uid)
         isLoading.value = true
         val storageRef = storage.reference
         val itemsRef = storageRef.child("items/${image.lastPathSegment}")
         val uploadTask = itemsRef.putFile(image)
+
         uploadTask.addOnSuccessListener { item ->
-                val downloadUrl = item.storage.downloadUrl
-            val itemData = ItemData(
-                name = userData.value!!.name,
-                number = userData.value!!.phonenumber,
-                title = title,
-                description = description,
-                image = downloadUrl.toString(),
-                location = location
-            )
-            Log.d("Item Data", itemData.toString())
-                firestore.collection(ITEMS).add(itemData).addOnSuccessListener { item->
+            // Retrieve the download URL once the file has been uploaded
+            itemsRef.downloadUrl.addOnSuccessListener { uri ->
+                val downloadUrl = uri.toString()
+                Log.d("Item Upload", "Download URL: $downloadUrl")
+
+                // Create the itemData object with the download URL
+                val itemData = ItemData(
+                    name = userData.value!!.name,
+                    number = userData.value!!.phonenumber,
+                    title = title,
+                    description = description,
+                    image = downloadUrl,
+                    location = location
+                )
+                Log.d("Item Data", itemData.toString())
+
+                // Add the item to Firestore
+                firestore.collection(ITEMS).add(itemData).addOnSuccessListener { item ->
                     val id = item.id
                     val itemRef = itemData.copy(id = id)
                     firestore.collection(ITEMS).document(id).set(itemRef)
@@ -107,15 +123,19 @@ class MainViewModel @Inject constructor(
                     Toast.makeText(context, "Item added successfully", Toast.LENGTH_LONG).show()
                 }.addOnFailureListener {
                     isLoading.value = false
-                    Toast.makeText(context, "${it.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, "Failed to add item: ${it.message}", Toast.LENGTH_LONG).show()
                 }
 
-        }.addOnFailureListener{
-            Log.d("Item Post", it.stackTrace.toString())
+            }.addOnFailureListener {
+                isLoading.value = false
+                Log.e("Item Upload", "Failed to get download URL: ${it.message}")
+                Toast.makeText(context, "Failed to get download URL: ${it.message}", Toast.LENGTH_LONG).show()
+            }
+        }.addOnFailureListener {
             isLoading.value = false
-            Toast.makeText(context, "${it.message}", Toast.LENGTH_LONG).show()
+            Log.e("Item Upload", "File upload failed: ${it.message}")
+            Toast.makeText(context, "File upload failed: ${it.message}", Toast.LENGTH_LONG).show()
         }
-
     }
 
 }
