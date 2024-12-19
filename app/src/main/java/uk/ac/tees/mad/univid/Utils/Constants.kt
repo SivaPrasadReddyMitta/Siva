@@ -8,6 +8,7 @@ val yellowColor = Color(0xFFFDD563)
 val whiteColor = Color(0xFFFAF7CC)
 val darkPurpleColor = Color(0xFF54309E)
 val lightPurpleColor = Color(0xFFCDC1FF)
+val lightPurpleColorA = Color(0xFF585A89)
 
 const val USERS = "users"
 const val ITEMS = "items"
