@@ -14,7 +14,7 @@ interface ItemDao {
     @Query("SELECT * from items ORDER BY name ASC")
     fun getAllItems() : Flow<List<Items>>
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(item : List<Items>)
 
     @Delete

@@ -34,6 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -56,7 +57,7 @@ import uk.ac.tees.mad.univid.ui.theme.poppins
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(navController: NavController, vm: MainViewModel) {
-    val items = vm.item
+    val items = vm.item.collectAsState()
     val context = LocalContext.current
     val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
@@ -119,7 +120,9 @@ fun HomeScreen(navController: NavController, vm: MainViewModel) {
 
 @Composable
 fun ItemView(image: String, title: String, location: String, onItemClick: () -> Unit) {
-    Box(modifier = Modifier.clip(RoundedCornerShape(12.dp)).clickable { onItemClick() }) {
+    Box(modifier = Modifier
+        .clip(RoundedCornerShape(12.dp))
+        .clickable { onItemClick() }) {
         Column(modifier = Modifier.height(370.dp)) {
             AsyncImage(
                 model = image, contentDescription = null,

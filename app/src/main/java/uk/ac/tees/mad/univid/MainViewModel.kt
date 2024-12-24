@@ -4,14 +4,21 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import uk.ac.tees.mad.univid.Utils.ITEMS
 import uk.ac.tees.mad.univid.Utils.USERS
+import uk.ac.tees.mad.univid.models.local.Items
 import uk.ac.tees.mad.univid.models.remote.ItemData
 import uk.ac.tees.mad.univid.models.remote.UserData
 import javax.inject.Inject
@@ -20,29 +27,61 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     val auth : FirebaseAuth,
     val firestore : FirebaseFirestore,
-    val storage : FirebaseStorage
+    val storage : FirebaseStorage,
+    private val appRepository: AppRepository
 ) : ViewModel() {
 
     val isLoading = mutableStateOf(false)
     val isSignedIn = mutableStateOf(false)
     val userData = mutableStateOf<UserData?>(null)
-    val item = mutableStateOf<List<ItemData>>(emptyList<ItemData>())
+
+    private val _item = MutableStateFlow<List<Items>>(emptyList())
+    val item: StateFlow<List<Items>> get() = _item
+
+    private val _items = MutableStateFlow<List<Items>>(emptyList())
+
 
     init {
         if(auth.currentUser != null){
             isSignedIn.value = true
+            getUserDataWothoutCOntext(auth.currentUser!!.uid)
         }
         getAllFromFirebase()
     }
 
     fun getAllFromFirebase(){
         firestore.collection(ITEMS).get().addOnSuccessListener {
-            item.value = it.toObjects(ItemData::class.java)
-            Log.d("Item", "${item.value}")
+            val itemDataList = it.toObjects(ItemData::class.java)
+            _items.value = itemDataList.map { it.toItems() }
+            insertInDatabase(_items.value)
+            Log.d("Item", "${_items.value}")
         }.addOnFailureListener {
             Log.d("Item", "${it.message}")
         }
     }
+
+    fun insertInDatabase(item : List<Items>){
+        viewModelScope.launch {
+            appRepository.delete()
+            appRepository.addData(item)
+            appRepository.getAllFromDB().collect{itemList->
+                _item.value = itemList
+            }
+        }
+    }
+
+    fun ItemData.toItems(): Items {
+        return Items(
+            id = id,
+            name = name,
+            number = number,
+            title = title,
+            description = description,
+            image = image,
+            location = location
+        )
+    }
+
     fun signUp(context: Context, name: String, email: String, password: String, phone: String) {
         isLoading.value = true
         auth.createUserWithEmailAndPassword(email, password).addOnSuccessListener {
@@ -86,6 +125,15 @@ class MainViewModel @Inject constructor(
             Log.d("USER", "${userData.value}")
         }.addOnFailureListener {
             Toast.makeText(context, "${it.message}", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    fun getUserDataWothoutCOntext(uid: String){
+        firestore.collection(USERS).document(uid).get().addOnSuccessListener {
+            userData.value = it.toObject(UserData::class.java)
+            Log.d("USER", "${userData.value}")
+        }.addOnFailureListener {
+            Log.d( "Failed to load user","${it.message}")
         }
     }
 
