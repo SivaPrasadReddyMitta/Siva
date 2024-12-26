@@ -60,6 +60,7 @@ import com.google.android.gms.location.LocationServices
 import uk.ac.tees.mad.univid.MainViewModel
 import uk.ac.tees.mad.univid.R
 import uk.ac.tees.mad.univid.Utils.darkPurpleColor
+import uk.ac.tees.mad.univid.Utils.getAddressFromLocation
 import uk.ac.tees.mad.univid.ui.theme.poppins
 import java.io.File
 import java.text.SimpleDateFormat
@@ -243,6 +244,23 @@ fun ReportScreen(navController: NavController, vm : MainViewModel) {
                         )
                     )
                 }
+                Spacer(modifier = Modifier.height(25.dp))
+                Column {
+                    Text(text = "LOCATION", fontFamily = poppins, fontWeight = FontWeight.Bold)
+                    TextField(
+                        value = location,
+                        onValueChange = { location = it },
+                        singleLine = true,
+                        modifier = Modifier.width(280.dp),
+                        colors = TextFieldDefaults.textFieldColors(
+                            disabledTextColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            disabledIndicatorColor = Color.Transparent,
+                            cursorColor = Color.Black
+                        )
+                    )
+                }
                 Spacer(modifier = Modifier.height(20.dp))
 
                 Button(onClick = {
@@ -278,19 +296,3 @@ fun Context.createImageFile(): File {
     return image
 }
 
-fun getAddressFromLocation(context: Context, location: Location, onChange: (String) -> Unit) {
-    val geocoder = Geocoder(context, Locale.getDefault())
-    val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
-    if (addresses != null) {
-        Log.d("Address", addresses.toString())
-        if (addresses.isNotEmpty()) {
-            val address = addresses[0]
-            Log.d("Address", address.toString())
-            // Use address.getAddressLine(0) to get the full address or other methods as needed
-            val addressString = address.getAddressLine(0)
-            // Update your TextField or state with the address
-            Log.d("Address", addressString.toString())
-            onChange(addressString)
-        }
-    }
-}

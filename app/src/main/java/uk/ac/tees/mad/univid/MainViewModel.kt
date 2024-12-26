@@ -82,6 +82,23 @@ class MainViewModel @Inject constructor(
         )
     }
 
+    fun updateUserData(name: String, email: String, phone: String){
+        isLoading.value = true
+        val user = userData.value?.copy(
+            name = name,
+            email = email,
+            phonenumber = phone
+        )
+        Log.d("Updated User", user.toString())
+        firestore.collection(USERS).document(auth.currentUser!!.uid).set(user!!).addOnSuccessListener {
+            getUserDataWothoutCOntext(auth.currentUser!!.uid)
+            isLoading.value = false
+        }.addOnFailureListener {
+            Log.d("Update Failed", "${it.message}")
+            isLoading.value = false
+        }
+    }
+
     fun signUp(context: Context, name: String, email: String, password: String, phone: String) {
         isLoading.value = true
         auth.createUserWithEmailAndPassword(email, password).addOnSuccessListener {
