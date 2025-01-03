@@ -25,7 +25,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -72,6 +74,7 @@ import java.util.Objects
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ReportScreen(navController: NavController, vm : MainViewModel) {
+    val scroll = rememberScrollState()
     var title by remember {
         mutableStateOf("")
     }
@@ -155,7 +158,8 @@ fun ReportScreen(navController: NavController, vm : MainViewModel) {
     ) {
         Box(modifier = Modifier
             .fillMaxSize()
-            .padding(it)) {
+            .padding(it)
+            .verticalScroll(scroll)) {
             Column(
                 modifier = Modifier
                     .fillMaxSize(),
@@ -244,23 +248,6 @@ fun ReportScreen(navController: NavController, vm : MainViewModel) {
                         )
                     )
                 }
-                Spacer(modifier = Modifier.height(25.dp))
-                Column {
-                    Text(text = "LOCATION", fontFamily = poppins, fontWeight = FontWeight.Bold)
-                    TextField(
-                        value = location,
-                        onValueChange = { location = it },
-                        singleLine = true,
-                        modifier = Modifier.width(280.dp),
-                        colors = TextFieldDefaults.textFieldColors(
-                            disabledTextColor = Color.Transparent,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            disabledIndicatorColor = Color.Transparent,
-                            cursorColor = Color.Black
-                        )
-                    )
-                }
                 Spacer(modifier = Modifier.height(20.dp))
 
                 Button(onClick = {
@@ -276,7 +263,9 @@ fun ReportScreen(navController: NavController, vm : MainViewModel) {
                 }
             }
             if (isLoading.value) {
-                Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.5f)), contentAlignment = Alignment.Center) {
+                Box(modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.5f)), contentAlignment = Alignment.Center) {
                     LinearProgressIndicator()
                 }
             }
