@@ -1,5 +1,7 @@
 package uk.ac.tees.mad.univid.screens
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,6 +15,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -21,6 +24,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -44,13 +48,17 @@ fun DetailsScreen(
     phoneNumber: String?,
     name: String?
 ) {
+    val context = LocalContext.current
     val scroll = rememberScrollState()
     Scaffold(
         topBar = {
             TopAppBar(title = { Row(modifier = Modifier.padding(start = 1.dp)) {
-                Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = null, modifier = Modifier.size(34.dp).padding(end = 10.dp).clickable {
+                Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = null, modifier = Modifier
+                    .size(34.dp)
+                    .padding(end = 10.dp)
+                    .clickable {
                         navigateWithoutBackStack(navController, AppNavigationComponent.Home)
-                }
+                    }
                 )
                 Text(text = "Lost item")
             }})
@@ -75,8 +83,23 @@ fun DetailsScreen(
                 Text(text = itemDescription ?: "", fontFamily = poppins)
                 Spacer(modifier = Modifier.height(15.dp))
                 Text(text = "User Informations", fontFamily = poppins, fontWeight = FontWeight.SemiBold, fontSize = 20.sp)
-                Text(text = ("Phone Number: " + phoneNumber), fontFamily = poppins)
                 Text(text = ("Name: " + name), fontFamily = poppins)
+                Row {
+                    Button(onClick = { 
+                        val callUri = Uri.parse("tel:$phoneNumber")
+                        val intent = Intent(Intent.ACTION_DIAL, callUri)
+                        context.startActivity(intent)
+                    }) {
+                        Text(text = "Call Now")
+                    }
+                    Button(onClick = { 
+                        val smsUri = Uri.parse("sms:$phoneNumber")
+                        val intent = Intent(Intent.ACTION_SENDTO, smsUri)
+                        intent.putExtra("sms_body", "Hello, I am interested in your item")
+                        context.startActivity(intent)}) {
+                        Text(text = "Send Message")
+                    }
+                }
             }
         }
     }
