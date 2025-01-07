@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "459202411077",
-    "project_id": "lost2found-13849",
+    "project_number": "645162731743",
+    "project_id": "lost2found-831b6",
     "storage_bucket": "lost2found-13849.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:459202411077:android:b617fbd7564c2e0b8e012c",
+        "mobilesdk_app_id": "1:645162731743:android:b76ad6af8b989732d7c16a",
         "android_client_info": {
           "package_name": "uk.ac.tees.mad.univid"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyANldoJcpWojOG8X1qxvrxlyaz2fdlnKL4"
+          "current_key": "AIzaSyAmOvtuITB2A676D3BPO2igR5TkrgGlZUo"
         }
       ],
       "services": {
