@@ -153,7 +153,7 @@ fun ReportScreen(navController: NavController, vm : MainViewModel) {
         .fillMaxSize()
         .windowInsetsPadding(WindowInsets.navigationBars),
         bottomBar = {
-            BottomNavBar(selectedItem = BottomNavItems.ReportScreen, navController = navController)
+            BottomNavigationBar(navController = navController)
         }
     ) {
         Box(modifier = Modifier

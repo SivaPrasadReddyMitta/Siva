@@ -202,5 +202,5 @@ class MainViewModel @Inject constructor(
             Toast.makeText(context, "File upload failed: ${it.message}", Toast.LENGTH_LONG).show()
         }
     }
-
+    val selectedIcon = mutableStateOf(0)
 }

@@ -36,6 +36,8 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -45,6 +47,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,6 +66,7 @@ import uk.ac.tees.mad.univid.MainViewModel
 import uk.ac.tees.mad.univid.R
 import uk.ac.tees.mad.univid.Utils.getAddressFromLocation
 import uk.ac.tees.mad.univid.Utils.lightPurpleColor
+import uk.ac.tees.mad.univid.Utils.navigateWithBackStack
 import uk.ac.tees.mad.univid.Utils.navigateWithoutBackStack
 import java.util.Locale
 
@@ -122,11 +126,12 @@ fun ProfileScreen(navController: NavController, vm: MainViewModel) {
         getCurrentLocation()
     }
 
+    var selectedItemIndex = vm.selectedIcon.value
     Scaffold (modifier = Modifier
         .fillMaxSize()
         .windowInsetsPadding(WindowInsets.navigationBars),
         bottomBar = {
-            BottomNavBar(selectedItem = BottomNavItems.ProfileScreen, navController = navController)
+            BottomNavigationBar(navController = navController)
         }
     ) {
         Column(modifier = Modifier

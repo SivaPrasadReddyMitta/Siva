@@ -10,12 +10,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -32,6 +35,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import uk.ac.tees.mad.univid.AppNavigationComponent
 import uk.ac.tees.mad.univid.MainViewModel
+import uk.ac.tees.mad.univid.Utils.darkPurpleColor
 import uk.ac.tees.mad.univid.Utils.navigateWithoutBackStack
 import uk.ac.tees.mad.univid.ui.theme.poppins
 
@@ -89,14 +93,21 @@ fun DetailsScreen(
                         val callUri = Uri.parse("tel:$phoneNumber")
                         val intent = Intent(Intent.ACTION_DIAL, callUri)
                         context.startActivity(intent)
-                    }) {
+                    }, modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.buttonColors(darkPurpleColor)
+                    ) {
                         Text(text = "Call Now")
                     }
+                    Spacer(modifier = Modifier.width(4.dp))
                     Button(onClick = { 
                         val smsUri = Uri.parse("sms:$phoneNumber")
                         val intent = Intent(Intent.ACTION_SENDTO, smsUri)
                         intent.putExtra("sms_body", "Hello, I am interested in your item")
-                        context.startActivity(intent)}) {
+                        context.startActivity(intent)},
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.buttonColors(darkPurpleColor)) {
                         Text(text = "Send Message")
                     }
                 }
